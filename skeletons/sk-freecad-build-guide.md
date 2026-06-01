@@ -22,11 +22,11 @@ licence: CC BY-SA 4.0
 After following this guide, the builder has a complete, validated FreeCAD
 parametric model of their specific libdrone configuration, with all parts
 ready to export for slicing. This skeleton is the 3.0.0 replacement for the
-V2.4.6 FreeCAD Cookbook — a 2,083-line step-by-step guide. The skeleton
+3.0.0 corpus. The skeleton
 provides the arc; the atoms provide the reference; the Cookbook provides
 the detailed click-map for each modelling operation.
 
-**This guide requires the V2.4.6 FreeCAD Cookbook open on your second screen.**
+**This guide requires the V3.0.0 FreeCAD Cookbook open on your second screen.**
 The Cookbook contains FreeCAD-version-specific UI interactions (menu paths,
 dialog names, constraint tools) that change between FreeCAD versions. This
 skeleton provides the conceptual structure and decision points; the Cookbook
