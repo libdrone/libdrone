@@ -1,0 +1,337 @@
+# LD_V300_Variables.FCMacro
+# libdrone V3.0.0 — parametric variable table population macro
+#
+# Licence: CC BY-SA 4.0
+# Author:  Jakub Safar (jsa)
+# Corpus:  https://libdrone.eu / https://github.com/libdrone/libdrone
+#
+# Usage:
+#   1. Open or create a FreeCAD document (.FCStd).
+#   2. Copy this file to your FreeCAD Macro folder:
+#        macOS:          ~/Library/Preferences/FreeCAD/Macro/
+#        Linux native:   ~/.FreeCAD/Macro/
+#        Linux Flatpak:  ~/.var/app/org.freecad.FreeCAD/data/FreeCAD/1.1/Macro/
+#                        (confirm path via Tools → Macros)
+#        Windows:        %APPDATA%\FreeCAD\Macro\
+#   3. Tools → Macros → select LD_V300_Variables → Execute.
+#   4. A spreadsheet named "Variables" appears in the Model Tree.
+#   5. Spot-check: click cell B1 → Properties → confirm Alias shows "Wheelbase".
+#   6. Ctrl+S to save.
+#
+# Reference articles:
+#   variable-table-structure.md  — section map, alias rules, frame- vs electronics-driven
+#   variable-table-values.md     — authoritative values with tolerances and notes
+#   freecad-document-setup.md    — FreeCAD preferences required before running this macro
+#   prep-and-parametrics.md      — Phase 0 build workflow
+#   coupon-validation.md         — coupons that must be printed before full production
+#
+# After running this macro, verify the following before printing any part:
+#   Coupon 8   — T-slot fit         → may require TabWidth or TabClearance adjustment
+#   Coupon 8b  — Rod interference   → may require RodDiaChannelCore adjustment
+#   Coupon 10  — GX12 D-D bore      → may require GX12ChimneyBoreFlatFlat adjustment
+#   Coupon 11  — Battery rail fit   → may require BattRailInnerWidth adjustment
+#
+# Section 8 (Battery Spoiler) is retained as a deprecated placeholder to preserve
+# section numbering continuity. All Section 8 variables are empty by design.
+#
+# WARNING: Variable names are case-sensitive. A mismatched alias means any
+# sketch referencing that variable will have an unsatisfied dimension.
+
+import FreeCAD
+
+doc = FreeCAD.ActiveDocument
+if doc is None:
+    FreeCAD.newDocument("libdrone_V300")
+    doc = FreeCAD.ActiveDocument
+
+# Remove existing Variables spreadsheet if present (allows re-run)
+existing = doc.getObject("Variables")
+if existing is not None:
+    doc.removeObject("Variables")
+
+sheet = doc.addObject("Spreadsheet::Sheet", "Variables")
+doc.recompute()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Helper: set a cell label (col A), value (col B), alias, and optional comment
+# ──────────────────────────────────────────────────────────────────────────────
+def var(row, name, value, alias, comment=""):
+    sheet.set("A" + str(row), name)
+    sheet.set("B" + str(row), str(value))
+    sheet.setAlias("B" + str(row), alias)
+    if comment:
+        sheet.set("C" + str(row), comment)
+
+def section(row, title):
+    sheet.set("A" + str(row), "### " + title + " ###")
+    sheet.setStyle("A" + str(row), "bold")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 1 — Frame geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(1,  "1. Frame geometry")
+var(2,  "Wheelbase",         "330.0",  "Wheelbase",        "Diagonal motor-to-motor distance (True-X) [mm]")
+var(3,  "StackPattern",      "30.5",   "StackPattern",     "FC/ESC square mounting pattern M3 [mm] — electronics-driven, do not scale")
+var(4,  "WallThick",         "2.0",    "WallThick",        "Nominal shell wall thickness [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 2 — Arm geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(6,  "2. Arm geometry")
+var(7,  "ArmWidth",          "26.0",   "ArmWidth",         "Arm shaft width [mm]")
+var(8,  "ArmHeight",         "16.0",   "ArmHeight",        "Arm shaft height = SandwichHeight [mm]")
+var(9,  "MotorHeadWidth",    "35.0",   "MotorHeadWidth",   "Motor mount head width [mm]")
+var(10, "MotorHeadHeight",   "18.0",   "MotorHeadHeight",  "Motor mount head height [mm]")
+var(11, "MotorHeadTaper",    "20.0",   "MotorHeadTaper",   "Loft transition length motor head → shaft [mm]")
+var(12, "PinchSlit",         "0.5",    "PinchSlit",        "Slit width for rod pre-tension clamp [mm]")
+var(13, "CoverScrewDia",     "2.0",    "CoverScrewDia",    "M2 screw clearance for arm covers [mm]")
+var(14, "ArmShaftLength",    "125.0",  "ArmShaftLength",   "Shaft length from tab junction to motor head [mm] — verify in Assembly after wheelbase change")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 3 — Rod architecture
+# ──────────────────────────────────────────────────────────────────────────────
+section(16, "3. Rod architecture")
+var(17, "RodDia",               "2.0",  "RodDia",               "Carbon rod outer diameter — physical [mm]")
+var(18, "RodDiaChannel",        "2.2",  "RodDiaChannel",        "Printed rod channel — clearance fit, PCCF layers + PETG non-core [mm]")
+var(19, "RodDiaChannelCore",    "2.1",  "RodDiaChannelCore",    "Rod channel — interference fit, PETG bottom core zone only [mm] — Coupon 8b")
+var(20, "RodOffsetOuter",       "5.0",  "RodOffsetOuter",       "Rod channel centre Z offset — outer pair [mm]")
+var(21, "RodOffsetInner",       "2.0",  "RodOffsetInner",       "Rod channel centre Z offset — inner pair [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 4 — Sandwich body geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(23, "4. Sandwich body geometry")
+var(24, "SandwichHeight",           "16.0", "SandwichHeight",           "Total sandwich height — derived: PETGBot+3xPCCF+PETGTop [mm]")
+var(25, "PCCFLayerThick",           "3.0",  "PCCFLayerThick",           "Thickness of each PCCF structural layer (x3) [mm]")
+var(26, "PETGBotLayerThick",        "3.0",  "PETGBotLayerThick",        "PETG bottom layer — impact face [mm]")
+var(27, "PETGTopLayerThick",        "4.0",  "PETGTopLayerThick",        "PETG top layer — structural surface [mm]")
+var(28, "MIPIChannelDepth",         "1.5",  "MIPIChannelDepth",         "MIPI cable channel depth — Platform geometry [mm]")
+var(29, "MIPIChannelWidth",         "16.0", "MIPIChannelWidth",         "MIPI cable channel width — electronics-driven [mm]")
+var(30, "XBodyArmWidth",            "40.0", "XBodyArmWidth",            "Width of X body arm zone at tab junction [mm]")
+var(31, "XBodyCoreSize",            "60.0", "XBodyCoreSize",            "Central core square side length [mm]")
+var(32, "XBodyArmLength",           "35.0", "XBodyArmLength",           "Length of X body arm extension from core edge [mm]")
+var(33, "SandwichBoltDia",          "3.3",  "SandwichBoltDia",          "M3 clearance through-hole all sandwich layers [mm]")
+var(34, "SandwichBoltCornerOffset", "18.0", "SandwichBoltCornerOffset", "Corner bolt offset from body centre X and Y [mm] — use 18 not 20")
+var(35, "SandwichBoltNoseTailY",    "22.0", "SandwichBoltNoseTailY",    "Y offset for nose and tail perimeter bolts [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 5 — Tab geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(37, "5. Tab geometry")
+var(38, "TabLength",       "20.0", "TabLength",       "Tab engagement depth inside sandwich [mm]")
+var(39, "TabWidth",        "22.0", "TabWidth",        "Tab width [mm] — adjust from Coupon 8 result")
+var(40, "TabThick",        "16.0", "TabThick",        "Tab thickness = SandwichHeight [mm]")
+var(41, "TabLockWidth",    "8.0",  "TabLockWidth",    "T-lock extension width [mm]")
+var(42, "TabLockDepth",    "4.0",  "TabLockDepth",    "T-lock extension depth into sandwich [mm]")
+var(43, "TabScrewDia",     "2.0",  "TabScrewDia",     "M2 screw clearance shaft-to-tab [mm]")
+var(44, "TabScrewSpacing", "10.0", "TabScrewSpacing", "Centre-to-centre M2 screw spacing [mm]")
+var(45, "TabClearance",    "0.2",  "TabClearance",    "T-slot pocket clearance per side [mm] — adjust from Coupon 8")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 6 — Motor mount geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(47, "6. Motor mount geometry")
+var(48, "MotorBoreDia",     "6.5", "MotorBoreDia",     "Through-bore for M3 screws + silicone sleeves [mm]")
+var(49, "ORingCBoreDia",    "7.0", "ORingCBoreDia",    "O-ring counterbore diameter [mm]")
+var(50, "ORingCBoreDepth",  "1.5", "ORingCBoreDepth",  "O-ring counterbore depth [mm]")
+var(51, "ORingRimHeight",   "0.5", "ORingRimHeight",   "Lateral rim height preventing O-ring migration [mm]")
+var(52, "ORingRimWall",     "0.5", "ORingRimWall",     "Rim wall thickness [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 7 — Cable management geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(54, "7. Cable management geometry")
+var(55, "CablePortDia",        "5.5",   "CablePortDia",        "Strain relief port in motor head side wall [mm]")
+var(56, "CableGrooveWidth",    "4.5",   "CableGrooveWidth",    "Arm shaft dovetail cable groove width at surface [mm]")
+var(57, "CableGrooveDepth",    "2.0",   "CableGrooveDepth",    "Arm shaft dovetail cable groove depth [mm]")
+var(58, "CableGrooveAngle",    "8.0",   "CableGrooveAngle",    "Arm shaft dovetail wall angle [deg]")
+var(59, "WireChannelWidth",    "4.0",   "WireChannelWidth",    "Platform wire routing channel width [mm]")
+var(60, "WireChannelDepth",    "1.0",   "WireChannelDepth",    "Platform wire routing channel depth [mm]")
+var(61, "WireChannelOffset",   "20.0",  "WireChannelOffset",   "Channel centreline offset from body centreline [mm]")
+var(62, "BattLeadNotchWidth",  "8.0",   "BattLeadNotchWidth",  "Battery lead relief notch width [mm]")
+var(63, "BattLeadNotchDepth",  "4.0",   "BattLeadNotchDepth",  "Battery lead relief notch depth [mm]")
+var(64, "FanWidth",            "30.0",  "FanWidth",            "Cooling fan body width (Gdstime 3010) [mm]")
+var(65, "FanDepth",            "10.0",  "FanDepth",            "Cooling fan body depth [mm]")
+var(66, "FanSlotWidth",        "30.0",  "FanSlotWidth",        "Fan slot width in Platform rear shroud [mm]")
+var(67, "FanSlotHeight",       "35.0",  "FanSlotHeight",       "Fan slot height [mm]")
+var(68, "FanSlotPosY",         "-138.0","FanSlotPosY",         "Fan front face position from body centre [mm]")
+var(69, "FanSlotWall",         "1.5",   "FanSlotWall",         "Minimum wall either side of fan slot [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 8 — Battery Spoiler (DEPRECATED V2.4.6)
+# Section retained as placeholder to preserve section numbering continuity.
+# All spoiler variables removed. Do not add variables here.
+# ──────────────────────────────────────────────────────────────────────────────
+section(71, "8. Battery Spoiler — DEPRECATED")
+sheet.set("A72", "Section 8 retired V2.4.6. Always-on fan replaces spoiler. Do not add variables here.")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 9 — GX12-7 dual payload connector geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(74, "9. GX12-7 dual payload connector geometry")
+# Bore profile: D-D shape (two arcs + two parallel flats) — NOT a round hole.
+# See variable-table-values.md Section 9 for FreeCAD Sketcher construction.
+# Coupon 10 must be printed to verify fit before printing full Platform.
+var(75, "GX12NominalDia",           "12.0",  "GX12NominalDia",           "GX12 nominal designation — NOT the actual body OD [mm]")
+var(76, "GX12BodyFlatFlat",         "10.60", "GX12BodyFlatFlat",         "Male body flat-to-flat — physically measured [mm]")
+var(77, "GX12BodyOD",               "11.67", "GX12BodyOD",               "Male body full OD at threaded collar — physically measured [mm]")
+var(78, "GX12ChimneyBoreFlatFlat",  "10.80", "GX12ChimneyBoreFlatFlat",  "Chimney bore flat-to-flat = BodyFlatFlat + 0.20mm clearance — Coupon 10")
+var(79, "GX12ChimneyBoreOD",        "11.87", "GX12ChimneyBoreOD",        "Chimney bore full dia = BodyOD + 0.20mm clearance [mm]")
+var(80, "GX12BossDia",              "14.0",  "GX12BossDia",              "Raised boss outer diameter on Platform [mm]")
+var(81, "GX12BossHeight",           "3.0",   "GX12BossHeight",           "Boss height above Platform surface [mm]")
+var(82, "GX12BodyLengthBelow",      "25.0",  "GX12BodyLengthBelow",      "Male body length below mounting surface [mm]")
+var(83, "GX12CapHeight",            "10.0",  "GX12CapHeight",            "Dust cap height above Platform surface [mm]")
+var(84, "GX12ChimneyOD",            "18.0",  "GX12ChimneyOD",            "Chimney outer diameter [mm]")
+var(85, "GX12ChimneyHeight",        "25.0",  "GX12ChimneyHeight",        "Chimney height below Platform [mm]")
+var(86, "GX12ChimneyWall",          "3.0",   "GX12ChimneyWall",          "Chimney wall thickness — PETG [mm]")
+var(87, "GX12WireExitWidth",        "6.0",   "GX12WireExitWidth",        "Wire exit slot width at chimney base [mm]")
+var(88, "GX12WireExitHeight",       "4.0",   "GX12WireExitHeight",       "Wire exit slot height at chimney base [mm]")
+var(89, "GX12A_PositionX",          "-25.0", "GX12A_PositionX",          "Connector A — left, signal channel side [mm]")
+var(90, "GX12B_PositionX",          "25.0",  "GX12B_PositionX",          "Connector B — right, power channel side [mm]")
+var(91, "GX12_PositionY",           "-66.0", "GX12_PositionY",           "Both connectors — mid-electronics zone — electronics-driven [mm]")
+var(92, "GX12_CentreToCentre",      "50.0",  "GX12_CentreToCentre",      "A to B centre-to-centre [mm]")
+var(93, "GX12_OuterGap",            "32.0",  "GX12_OuterGap",            "Clear gap between chimney outer walls [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 9b — Battery rail geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(95, "9b. Battery rail geometry")
+# Reference battery: Tattu 150C-1800mAh-6S-XT60 — 78 x 40 x 53 mm (LxWxH)
+# Battery centred on X body core. Exits RIGHT. Endstop wall on LEFT.
+var(96,  "BattLength",         "78.0", "BattLength",         "Reference battery length nose-to-tail [mm]")
+var(97,  "BattWidth",          "40.0", "BattWidth",          "Reference battery width side-to-side [mm]")
+var(98,  "BattHeight",         "53.0", "BattHeight",         "Reference battery height vertical [mm]")
+var(99,  "BattRailInnerWidth", "41.0", "BattRailInnerWidth", "Rail inner width = BattWidth + 1mm tolerance — Coupon 11")
+var(100, "BattRailHeight",     "53.0", "BattRailHeight",     "Rail height = BattHeight [mm]")
+var(101, "BattRailWall",       "3.0",  "BattRailWall",       "Rail wall thickness — PETG [mm]")
+var(102, "BattRailOuter",      "47.0", "BattRailOuter",      "Rail outer width = BattRailInnerWidth + 2 x BattRailWall [mm]")
+var(103, "BattStrapSlotWidth", "20.0", "BattStrapSlotWidth", "Lateral strap slot width in rail top face [mm]")
+var(104, "BattStrapSlotDepth", "3.0",  "BattStrapSlotDepth", "Lateral strap slot depth [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 10 — Mast interface geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(106, "10. Mast interface geometry")
+var(107, "MastInsertOD",      "4.6",  "MastInsertOD",      "Heat-set insert bore diameter [mm]")
+var(108, "MastBossDia",       "9.0",  "MastBossDia",       "Mast boss outer diameter [mm]")
+var(109, "MastBossHeight",    "7.0",  "MastBossHeight",    "Mast boss height (5mm insert + 2mm margin) [mm]")
+var(110, "MastSpacing",       "20.0", "MastSpacing",       "Mount hole centre-to-centre spacing [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 11 — GPS / camera bracket geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(112, "11. GPS / camera bracket geometry")
+# V2.4.6: bracket carries GPS (top) + camera (middle) only. VTX moved to Platform.
+# Camera tilt field-adjustable 0–30° via two-bolt arc-slot mechanism.
+var(113, "BracketWidth",         "26.0", "BracketWidth",         "Bracket width [mm]")
+var(114, "BracketMountDia",      "3.0",  "BracketMountDia",      "M3 clearance bracket-to-Platform mounting [mm]")
+var(115, "BracketMountSpacing",  "20.0", "BracketMountSpacing",  "M3 hole spacing at bracket base [mm]")
+var(116, "BracketCamTiltMin",    "0.0",  "BracketCamTiltMin",    "Minimum camera tilt [deg]")
+var(117, "BracketCamTiltMax",    "30.0", "BracketCamTiltMax",    "Maximum camera tilt [deg]")
+var(118, "BracketCamTiltDefault","15.0", "BracketCamTiltDefault","Default camera tilt [deg]")
+var(119, "BracketPivotSpacing",  "20.0", "BracketPivotSpacing",  "Pivot bolt to slot bolt distance [mm]")
+var(120, "BracketArcRadius",     "20.0", "BracketArcRadius",     "Arc slot radius = BracketPivotSpacing [mm]")
+var(121, "BracketSlotWidth",     "3.3",  "BracketSlotWidth",     "Arc slot width M3 clearance [mm]")
+var(122, "BracketSlotArcLength", "10.5", "BracketSlotArcLength", "Arc slot length covers full 30deg range [mm]")
+var(123, "BracketIndexSpacing",  "5.0",  "BracketIndexSpacing",  "Visual index mark spacing on bracket face [deg]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 12 — Assembly offsets and clearances
+# ──────────────────────────────────────────────────────────────────────────────
+section(125, "12. Assembly offsets and clearances")
+var(126, "RodEntryChamfer",    "0.5",  "RodEntryChamfer",    "Rod entry chamfer at channel entries all layers [mm x 45deg]")
+var(127, "TLockClearance",     "0.2",  "TLockClearance",     "T-lock clearance per side into T-slot [mm]")
+var(128, "PropClearanceMin",   "15.0", "PropClearanceMin",   "Minimum prop tip to any Platform feature [mm] — verify in cross-section")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 13 — Platform geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(130, "13. Platform geometry")
+# Three-layer architecture: X body sandwich / Platform (electronics) / Backplane (payloads)
+# Platform stepped width: 40mm battery+nose zone; 50mm from Y=-44mm (electronics zone).
+# All Y positions measured from X body centre. Positive = nose. Negative = tail.
+# CRITICAL: verify prop clearance at PlatformWidthElec before printing.
+#   Motor at Y = -116.7mm -> 15.7mm clearance per side. Zero headroom.
+#   If CAD reads < 15mm: reduce PlatformWidthElec from 50 to 48mm.
+var(131, "PlatformLength",        "283.0",  "PlatformLength",        "Total Platform length [mm] — electronics-driven")
+var(132, "PlatformWidthNarrow",   "40.0",   "PlatformWidthNarrow",   "Width — battery zone and nose [mm]")
+var(133, "PlatformWidthElec",     "50.0",   "PlatformWidthElec",     "Width — electronics zone [mm] — verify prop clearance")
+var(134, "PlatformStepY",         "-44.0",  "PlatformStepY",         "Y where width steps out to ElecWidth [mm]")
+var(135, "PlatformThick",         "3.0",    "PlatformThick",         "Platform base plate thickness [mm]")
+var(136, "PlatformNose",          "110.0",  "PlatformNose",          "Platform nose tip from body centre [mm]")
+var(137, "PlatformTail",          "-173.0", "PlatformTail",          "Platform tail tip from body centre [mm]")
+var(138, "PlatformAttachSpacing", "20.0",   "PlatformAttachSpacing", "M3 screw spacing Platform to X body [mm]")
+var(139, "BattZoneFront",         "39.0",   "BattZoneFront",         "Battery front edge from body centre [mm]")
+var(140, "BattZoneRear",          "-39.0",  "BattZoneRear",          "Battery rear edge from body centre [mm]")
+var(141, "ElecZoneFront",         "-44.0",  "ElecZoneFront",         "Electronics zone front (ESC front) [mm]")
+var(142, "ElecZoneRear",          "-89.0",  "ElecZoneRear",          "Electronics zone rear (ESC rear) [mm]")
+var(143, "BuckZoneRear",          "-99.0",  "BuckZoneRear",          "Buck converter rear edge [mm]")
+var(144, "VTXZoneFront",          "-104.0", "VTXZoneFront",          "VTX front edge [mm]")
+var(145, "VTXZoneRear",           "-133.0", "VTXZoneRear",           "VTX rear edge [mm]")
+var(146, "FanZoneFront",          "-138.0", "FanZoneFront",          "Fan front face [mm]")
+var(147, "FanZoneRear",           "-148.0", "FanZoneRear",           "Fan rear face / exhaust point [mm]")
+var(148, "AntennaPos",            "-153.0", "AntennaPos",            "ELRS antenna position from body centre [mm]")
+var(149, "BracketZoneFront",      "110.0",  "BracketZoneFront",      "Camera/GPS bracket nose tip [mm]")
+var(150, "BracketZoneRear",       "50.0",   "BracketZoneRear",       "Camera/GPS bracket base / Platform nose start [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 14 — Backplane geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(152, "14. Backplane geometry")
+# Attachment post positions (3 pairs, integral to Platform):
+#   Post pair A: Y = +39mm (battery front)
+#   Post pair B: Y = -39mm (battery rear)
+#   Post pair C: Y = -148mm (fan rear / backplane tail)
+# Battery zone RIGHT side fully open — no lattice beam between Y=+39 and Y=-39mm.
+# Fan exhaust zone (Y=-138 to -148mm): no lattice — fully open for exhaust.
+var(153, "BackplaneNose",          "39.0",   "BackplaneNose",          "Backplane nose edge = battery front edge [mm]")
+var(154, "BackplaneTail",          "-148.0", "BackplaneTail",          "Backplane tail edge = fan rear face [mm]")
+var(155, "BackplaneLength",        "187.0",  "BackplaneLength",        "Total backplane length [mm]")
+var(156, "BackplaneWidth",         "50.0",   "BackplaneWidth",         "Backplane width = PlatformWidthElec [mm]")
+var(157, "BackplaneBeamWidth",     "3.0",    "BackplaneBeamWidth",     "Lattice beam width [mm]")
+var(158, "BackplaneBeamThick",     "1.5",    "BackplaneBeamThick",     "Lattice beam thickness above Platform [mm]")
+var(159, "BackplaneRibSpacing",    "20.0",   "BackplaneRibSpacing",    "Transverse rib centre-to-centre [mm]")
+var(160, "BackplaneFill",          "35.0",   "BackplaneFill",          "Approximate material fill [%] (~65% open area)")
+var(161, "BackplanePostDia",       "6.0",    "BackplanePostDia",       "Attachment post outer diameter [mm]")
+var(162, "BackplanePostHeight",    "54.0",   "BackplanePostHeight",    "Post height = BattRailHeight + 1mm [mm]")
+var(163, "BackplaneAttachDia",     "3.0",    "BackplaneAttachDia",     "M3 clearance hole at each post base [mm]")
+var(164, "BackplaneGX12BossOD",    "18.0",   "BackplaneGX12BossOD",   "Boss ring OD around GX12 hole in lattice [mm]")
+var(165, "BackplaneGX12BossThick", "3.0",    "BackplaneGX12BossThick","Boss ring wall thickness [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Section 15 — Pi bay and companion interface geometry
+# ──────────────────────────────────────────────────────────────────────────────
+section(167, "15. Pi bay and companion interface geometry")
+# Pi bay is MANDATORY on every build across all platforms.
+# Empty bay uses a printed cover plate. Pi Zero 2W installs in 15 minutes.
+# CRITICAL: Pi bay raises payload mast surface by PiBayInternalHeight (6mm)
+# above the Backplane surface. All mast height calculations must include this.
+var(168, "PiBayInternalWidth",    "72.0",  "PiBayInternalWidth",    "Pi bay internal width [mm]")
+var(169, "PiBayInternalLength",   "38.0",  "PiBayInternalLength",   "Pi bay internal length [mm]")
+var(170, "PiBayInternalHeight",   "6.0",   "PiBayInternalHeight",   "Pi bay internal height — adds 6mm to payload mast height [mm]")
+var(171, "PiBayWall",             "2.0",   "PiBayWall",             "Pi bay wall thickness [mm]")
+var(172, "PiBayStandoffSpacingX", "58.0",  "PiBayStandoffSpacingX", "Pi Zero 2W hole spacing X axis [mm]")
+var(173, "PiBayStandoffSpacingY", "23.0",  "PiBayStandoffSpacingY", "Pi Zero 2W hole spacing Y axis [mm]")
+var(174, "PiBayStandoffDia",      "2.5",   "PiBayStandoffDia",      "M2.5 standoff mounting holes [mm]")
+var(175, "PiBayHarnessSlot",      "8.0",   "PiBayHarnessSlot",      "JST-SH cable entry slot width [mm]")
+var(176, "PiZeroWidth",           "65.0",  "PiZeroWidth",           "Pi Zero 2W PCB width reference [mm]")
+var(177, "PiZeroLength",          "30.0",  "PiZeroLength",          "Pi Zero 2W PCB length reference [mm]")
+var(178, "PiZeroHeight",          "5.0",   "PiZeroHeight",          "Pi Zero 2W maximum component height reference [mm]")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Finalise
+# ──────────────────────────────────────────────────────────────────────────────
+doc.recompute()
+FreeCAD.ActiveDocument.save() if doc.FileName else None
+
+FreeCAD.Console.PrintMessage(
+    "\nLD_V300_Variables.FCMacro complete.\n"
+    "Variables spreadsheet created with 15 sections.\n"
+    "\nNext steps:\n"
+    "  1. Double-click Variables in Model Tree to verify.\n"
+    "  2. Spot-check: B2 alias = Wheelbase, B7 alias = ArmWidth.\n"
+    "  3. Print Coupon 8 (T-slot), Coupon 8b (rod), Coupon 10 (GX12), Coupon 11 (battery rail).\n"
+    "  4. Adjust TabWidth, RodDiaChannelCore, GX12ChimneyBoreFlatFlat, BattRailInnerWidth from coupon results.\n"
+    "  5. See variable-table-values.md for full tolerances and notes.\n"
+    "  Ctrl+S to save.\n"
+)

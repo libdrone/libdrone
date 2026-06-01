@@ -1,0 +1,6 @@
+# libdrone corpus tooling dependencies
+# Install: pip install -r requirements.txt
+# Or via setup.sh which creates a .venv automatically.
+
+# Required by validate_corpus.py and assemble_persona.py
+PyYAML>=6.0

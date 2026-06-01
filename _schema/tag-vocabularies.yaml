@@ -1,0 +1,68 @@
+---
+# libdrone 3.0.0 — Tag Vocabularies
+# Machine-readable source of truth for the validator.
+# To add a value: PR to LD_-_Knowledge_Schema_v300.md first.
+# This file is generated from Appendix A of that document.
+version: 3.0.0
+date: 2026-05-30
+
+personas:
+  - 1.builder
+  - 2.operator
+  - 3.payload-dev
+  - 4.workshop
+  - 5.student
+  - 6.evaluator
+  - 7.contributor
+  - 8.architect
+  - 9.defense
+
+topics:
+  - skeletons  # tag for skeleton (non-atom) documents
+  - physics-flight-mechanics
+  - control-systems
+  - propulsion
+  - power-systems
+  - sensors-fc
+  - communication-rf
+  - frame-structure
+  - materials
+  - emc-signal-integrity
+  - payload-architecture
+  - piloting-operations
+  - software-stack
+  - manufacturing
+  - safety-regulations
+  - iff-deconfliction
+  - thermal-management
+  - cad-parametric
+  - open-source-philosophy
+  - aerial-imaging
+  - resilience-community
+  - freecad-ui  # 2026-04-11 added: version-specific UI click maps, isolated from geometry articles
+  - firmware-autopilot  # firmware-layer articles (ArduPilot / Betaflight)
+
+platforms:
+  - all
+  - bandit
+  - core
+  - pro
+  - ghost
+  - wing
+
+scopes:
+  - generic
+  - libdrone
+
+statuses:
+  - draft
+  - released
+  - deprecated
+
+sections:
+  - Summary
+  - Concept
+  - Reference
+  - Procedure
+  - Rationale
+  - Connections

@@ -1,0 +1,23 @@
+# Internal session context — never publish
+CLAUDE.md
+
+# Internal session prompts — not for contributors
+_prompts/
+
+# macOS metadata
+.DS_Store
+**/.DS_Store
+
+# Editor artefacts
+.vscode/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# FreeCAD backup files
+*.FCStd1
+*.FCBak
