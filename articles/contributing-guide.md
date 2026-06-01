@@ -19,7 +19,7 @@ licence: CC BY-SA 4.0
 
 ## Summary
 
-libdrone is maintained on a self-hosted Gitea instance. Contributions follow
+libdrone is maintained on GitHub. Contributions follow
 a fork-and-PR workflow. Hardware changes require a coupon validation result
 before the PR is accepted. Documentation changes require the validator to pass
 with zero errors. Vocabulary changes require ratification by jsa before any
@@ -110,7 +110,7 @@ obligation on your payload.
 
 ### Vocabulary change process
 
-1. Open an issue on Gitea describing: the new tag, which existing articles
+1. Open an issue on GitHub describing: the new tag, which existing articles
    would be retroactively tagged, and why no existing tag covers it
 2. Wait for ratification (comment from jsa on the issue)
 3. Update `_schema/tag-vocabularies.yaml` with a dated comment

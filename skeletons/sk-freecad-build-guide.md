@@ -22,7 +22,7 @@ licence: CC BY-SA 4.0
 After following this guide, the builder has a complete, validated FreeCAD
 parametric model of their specific libdrone configuration, with all parts
 ready to export for slicing. This skeleton is the 3.0.0 replacement for the
-3.0.0 corpus. The skeleton
+V2.4.6 FreeCAD Cookbook — a 2,083-line step-by-step guide. The skeleton
 provides the arc; the atoms provide the reference; the Cookbook provides
 the detailed click-map for each modelling operation.
 
@@ -106,7 +106,7 @@ Before opening FreeCAD:
 
 1. Variables file open: → [[variable-table-values]]
 2. FreeCAD 1.1 installed (Flatpak or native)
-3. Macro file (`LD_V343_Variables.FCMacro`) copied to macro path
+3. Macro file (`LD_V300_Variables.FCMacro`) copied to macro path
 4. Second screen ready for the Cookbook
 
 ### Variable entry gate
@@ -173,7 +173,7 @@ Recovery sequence:
 
 ## Rationale
 
-The FreeCAD Cookbook (V2.4.6) is 2,083 lines of step-by-step UI click maps
+The FreeCAD Cookbook (V3.0.0) is 2,083 lines of step-by-step UI click maps
 that are necessarily version-specific — the menu paths and dialog layouts
 change between FreeCAD versions. This skeleton separates the stable conceptual
 content (modelling sequence, decision gates, EMC geometry requirements) from
