@@ -4,7 +4,8 @@ title: "A2 throttle compliance (retired)"
 version: 2.0.0
 date: 2026-06-01
 author: jsa
-status: draft
+status: deprecated
+replaced_by: legal-and-regulatory
 scope: libdrone
 topic:
   - software-stack

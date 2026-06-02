@@ -4,7 +4,7 @@ title: "ASA filament"
 version: 1.0.0
 date: 2026-05-30
 author: jsa
-status: draft
+status: released
 scope: generic
 topic:
   - materials

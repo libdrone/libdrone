@@ -4,7 +4,8 @@ title: "Regulatory overview (see legal-and-regulatory)"
 version: 2.0.0
 date: 2026-06-01
 author: jsa
-status: draft
+status: deprecated
+replaced_by: legal-and-regulatory
 scope: libdrone
 topic:
   - safety-regulations
